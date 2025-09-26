@@ -1,0 +1,48 @@
+name: Build Docker Image to GCR
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: false
+        type: string
+        default: "dev"
+      name:
+        required: true
+        type: string
+      deploy_on:
+        required: true
+        type: string # main หรือ tag
+    secrets:
+      GCP_PROJECT_ID:
+        required: true
+      GCP_REGION:
+        required: true
+      GCP_SA_KEY:
+        required: true
+
+jobs:
+  build-docker-to-gcr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker auth
+        run: gcloud auth configure-docker -q
+
+      - name: Build and Push Docker image
+        run: |
+          if [ "${{ inputs.deploy_on }}" = "main" ]; then
+            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:main-${{ github.sha }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/}
+            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$VERSION"
+          fi
+          docker build -t $IMAGE .
+          docker push $IMAGE

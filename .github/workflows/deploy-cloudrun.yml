@@ -1,0 +1,44 @@
+name: Reusable Go + Cloud Run Deploy
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: false
+        type: string
+        default: "dev"
+      name:
+        required: true
+        type: string
+      deploy_on:
+        required: true
+        type: string # main หรือ tag
+    secrets:
+      GCP_PROJECT_ID:
+        required: true
+      GCP_REGION:
+        required: true
+      GCP_SA_KEY:
+        required: true
+
+jobs:
+  deploy-cloudrun:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloud Run
+        run: |
+          if [ "${{ inputs.deploy_on }}" = "main" ]; then
+            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:main-${{ github.sha }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/}
+            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$VERSION"
+          fi
+
+          gcloud run deploy ${{ inputs.env }}-${{ inputs.name }} \
+            --image $IMAGE \
+            --region ${{ secrets.GCP_REGION }} \
+            --platform managed \
+            --quiet
