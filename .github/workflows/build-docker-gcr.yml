@@ -13,6 +13,14 @@ on:
       deploy_on:
         required: true
         type: string # main หรือ tag
+      docker_file:
+        required: false
+        type: string
+        default: Dockerfile
+      docker_context:
+        required: false
+        type: string
+        default: "."
     secrets:
       GCP_PROJECT_ID:
         required: true
@@ -44,5 +52,5 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/}
             IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$VERSION"
           fi
-          docker build -t $IMAGE .
+          docker build -t $IMAGE -f ${{ inputs.docker_file }} ${{ inputs.docker_context }}
           docker push $IMAGE
