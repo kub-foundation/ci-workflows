@@ -62,17 +62,17 @@ jobs:
             export TAG=${GITHUB_REF#refs/tags/}
           fi
 
-      - name: Defined Docker ARGS
-        run: |
-          DOCKER_BUILD_ARG_BUILD_TAG=$TAG
-          DOCKER_BUILD_ARGS="--build-arg BUILD_ID=$DOCKER_TAG"
-          DOCKER_ENVS=$(env | grep ^DOCKER_BUILD_ARG_*)
-          for change in $DOCKER_ENVS; do
-              set -- `echo $change | tr '=' ' '`
-              key=$(echo $1 | sed -e "s/^DOCKER_BUILD_ARG_//")
-              value=$2
-              DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg $key=$value";
-          done
+      # - name: Defined Docker ARGS
+      #   run: |
+      #     DOCKER_BUILD_ARG_BUILD_TAG=$TAG
+      #     DOCKER_BUILD_ARGS="--build-arg BUILD_ID=$DOCKER_TAG"
+      #     DOCKER_ENVS=$(env | grep ^DOCKER_BUILD_ARG_*)
+      #     for change in $DOCKER_ENVS; do
+      #         set -- `echo $change | tr '=' ' '`
+      #         key=$(echo $1 | sed -e "s/^DOCKER_BUILD_ARG_//")
+      #         value=$2
+      #         DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg $key=$value";
+      #     done
 
       - name: Build and Push Docker image
         run: |
@@ -82,7 +82,6 @@ jobs:
             -t $IMAGE:latest \
             -f ${{ inputs.docker_file }} \
             --cache-from $IMAGE \
-            $DOCKER_BUILD_ARGS \
             ${{ inputs.docker_context }}
 
           docker push --all-tags $IMAGE
