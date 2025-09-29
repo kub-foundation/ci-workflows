@@ -76,7 +76,6 @@ jobs:
 
       - name: Build and Push Docker image
         run: |
-          docker pull $IMAGE || true
           docker build \
             -t $IMAGE:$TAG \
             -t $IMAGE:latest \
