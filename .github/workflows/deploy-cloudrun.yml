@@ -39,7 +39,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
-            TAG=main-${{ github.sha }}
+            TAG=main-${GITHUB_SHA::7}
             IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$TAG"
           else
             TAG=${GITHUB_REF#refs/tags/}
