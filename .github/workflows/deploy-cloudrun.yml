@@ -1,4 +1,4 @@
-name: Reusable Go + Cloud Run Deploy
+name: Deploy to Google Cloud Run 
 
 on:
   workflow_call:
@@ -42,8 +42,14 @@ jobs:
             IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$VERSION"
           fi
 
-          gcloud run deploy ${{ inputs.env }}-${{ inputs.name }} \
+          SERVICE_NAME=${{ inputs.env }}-${{ inputs.name }}
+
+          gcloud secrets create $SERVICE_NAME --replication-policy="automatic" || true
+          
+          gcloud run deploy $SERVICE_NAME \
             --image $IMAGE \
             --region ${{ secrets.GCP_REGION }} \
+            --set-env-vars DOTENV_PATH=/gsm/secret/dotenv \
+            --set-secrets="/gsm/secret/dotenv=$SERVICE_NAME:latest" \
             --platform managed \
             --quiet
