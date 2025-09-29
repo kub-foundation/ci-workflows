@@ -3,10 +3,6 @@ name: Build Docker Image to GCR
 on:
   workflow_call:
     inputs:
-      env:
-        required: false
-        type: string
-        default: "dev"
       name:
         required: true
         type: string
@@ -34,7 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}
-      DOCKER_BUILD_ARG_TAG_NAME: hello
     steps:
       - name: Checkout
         uses: actions/checkout@v4
