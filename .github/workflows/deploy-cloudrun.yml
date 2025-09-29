@@ -54,6 +54,6 @@ jobs:
             --region ${{ secrets.GCP_REGION }} \
             --set-env-vars DOTENV_PATH=/gsm/secret/dotenv \
             --set-secrets="/gsm/secret/dotenv=$SERVICE_NAME:latest" \
-            --tag $TAG \
+            --tag $DOCKER_TAG \
             --platform managed \
             --quiet ${{ inputs.run_args }}
