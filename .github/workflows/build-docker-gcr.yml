@@ -56,17 +56,16 @@ jobs:
       #   run: cp ${PACKAGE_DIR}/envs/.env.${{ inputs.env }} ${PACKAGE_DIR}/.env || true
       #   continue-on-error: true
 
-      # - name: Defined Docker ARGS
-      #   run: |
-      #     DOCKER_BUILD_ARG_BUILD_TAG=$TAG
-      #     DOCKER_BUILD_ARGS="--build-arg BUILD_ID=$TAG"
-      #     DOCKER_ENVS=$(env | grep ^DOCKER_BUILD_ARG_*)
-      #     for change in $DOCKER_ENVS; do
-      #         set -- `echo $change | tr '=' ' '`
-      #         key=$(echo $1 | sed -e "s/^DOCKER_BUILD_ARG_//")
-      #         value=$2
-      #         DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg $key=$value";
-      #     done
+      - name: Defined Docker Build Args
+        run: |
+          DOCKER_BUILD_ARGS=""
+          DOCKER_ENVS=$(env | grep ^DOCKER_BUILD_ARG_*)
+          for change in $DOCKER_ENVS; do
+              set -- `echo $change | tr '=' ' '`
+              key=$(echo $1 | sed -e "s/^DOCKER_BUILD_ARG_//")
+              value=$2
+              DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg $key=$value";
+          done
 
       - name: Build and Push Docker image
         run: |
