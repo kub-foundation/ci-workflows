@@ -57,9 +57,9 @@ jobs:
       - name: Defined Docker Tag
         run: |
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
-            export TAG=${GITHUB_SHA::7}
+            export DOCKER_TAG=${GITHUB_SHA::7}
           else
-            export TAG=${GITHUB_REF#refs/tags/}
+            export DOCKER_TAG=${GITHUB_REF#refs/tags/}
           fi
 
       # - name: Defined Docker ARGS
@@ -78,7 +78,7 @@ jobs:
         run: |
           env
           docker build \
-            -t $IMAGE:$TAG \
+            -t $IMAGE:$DOCKER_TAG \
             -t $IMAGE:latest \
             -f ${{ inputs.docker_file }} \
             ${{ inputs.docker_context }}
