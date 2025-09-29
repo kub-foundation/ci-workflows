@@ -1,0 +1,44 @@
+name: Test Golang
+
+on:
+  workflow_call:
+    inputs:
+      go_version:
+        type: string
+        default: "1.24"
+
+jobs:
+  test_golang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ inputs.go_version }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v4.2.4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Configure Git for private modules
+        run: git config --global url."https://${{ secrets.CI_GITHUB_USERNAME }}:${{ secrets.CI_GITHUB_PAT }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Configure Go for private modules
+        run: |
+          go env -w GOPRIVATE="${{ env.GOPRIVATE }}"
+          go env -w GONOSUMDB="${{ env.GONOSUMDB }}"
+          go env -w GOPROXY="${{ env.GOPROXY }}"
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test ./... -count=1
