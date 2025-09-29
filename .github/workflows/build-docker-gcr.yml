@@ -46,18 +46,34 @@ jobs:
 
       - name: Build and Push Docker image
         run: |
+          export APP_DIR=${APP_DIR:-.}
+          export PACKAGE_DIR=${PACKAGE_DIR:-$APP_DIR}
+          export IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}"
+          cp ${PACKAGE_DIR}/envs/.env.${{ inputs.env }} ${PACKAGE_DIR}/.env || true
+
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
             TAG=${GITHUB_SHA::7}
-            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$TAG"
           else
             TAG=${GITHUB_REF#refs/tags/}
-            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$TAG"
           fi
 
-          env
+          DOCKER_BUILD_ARG_BUILD_TAG=$TAG
+          DOCKER_BUILD_ARGS="--build-arg BUILD_ID=$DOCKER_TAG"
+          DOCKER_ENVS=$(env | grep ^DOCKER_BUILD_ARG_*)
+          for change in $DOCKER_ENVS; do
+              set -- `echo $change | tr '=' ' '`
+              key=$(echo $1 | sed -e "s/^DOCKER_BUILD_ARG_//")
+              value=$2
+              DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg $key=$value";
+          done
 
-          docker build -t $IMAGE \
+          docker pull $IMAGE || true
+          docker build 
+            -t $IMAGE:$TAG \
+            -t $IMAGE:latest \
             -f ${{ inputs.docker_file }} \
+            --cache-from $IMAGE \
+            $DOCKER_BUILD_ARGS \
             ${{ inputs.docker_context }}
 
-          docker push $IMAGE
+          docker push --all-tags $IMAGE
