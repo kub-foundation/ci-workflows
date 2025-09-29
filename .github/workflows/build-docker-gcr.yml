@@ -34,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}
+      DOCKER_BUILD_ARG_TAG_NAME: hello
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,9 +59,8 @@ jobs:
 
       - name: Defined Docker Build Args
         run: |
-          DOCKER_BUILD_ARG_TAG_NAME=hello
-          DOCKER_BUILD_ARGS=""
           set +e
+          DOCKER_BUILD_ARGS=""
           DOCKER_ENVS=$(env | grep ^DOCKER_BUILD_ARG_*)
           for change in $DOCKER_ENVS; do
               set -- `echo $change | tr '=' ' '`
@@ -69,9 +69,11 @@ jobs:
               DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg $key=$value";
           done
 
-          set -e
+          
 
           echo $DOCKER_BUILD_ARGS
+
+          set -e
 
     #     set -- `echo $change | tr '=' ' '`
     #     key=$(echo $1 | sed -e "s/^DOCKER_BUILD_ARG_//")
