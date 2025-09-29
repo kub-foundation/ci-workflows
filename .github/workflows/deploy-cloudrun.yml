@@ -38,12 +38,11 @@ jobs:
           
       - name: Deploy to Cloud Run
         run: |
+          export IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}"
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
-            TAG=main-${GITHUB_SHA::7}
-            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$TAG"
+            export DOCKER_TAG=main-${GITHUB_SHA::7}
           else
-            TAG=${GITHUB_REF#refs/tags/}
-            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$TAG"
+            export DOCKER_TAG=${GITHUB_REF#refs/tags/}
           fi
 
           SERVICE_NAME=${{ inputs.env }}-${{ inputs.name }}

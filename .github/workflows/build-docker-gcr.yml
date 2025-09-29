@@ -70,7 +70,7 @@ jobs:
         run: |
           export IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}"
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
-            export DOCKER_TAG=${GITHUB_SHA::7}
+            export DOCKER_TAG=main-${GITHUB_SHA::7}
           else
             export DOCKER_TAG=${GITHUB_REF#refs/tags/}
           fi
