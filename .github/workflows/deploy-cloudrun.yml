@@ -27,6 +27,9 @@ on:
 jobs:
   deploy-cloudrun:
     runs-on: ubuntu-latest
+    env:
+      IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}
+      SERVICE_NAME: ${{ inputs.env }}-${{ inputs.name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,14 +41,11 @@ jobs:
           
       - name: Deploy to Cloud Run
         run: |
-          export IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}"
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
             export DOCKER_TAG=main-${GITHUB_SHA::7}
           else
             export DOCKER_TAG=${GITHUB_REF#refs/tags/}
           fi
-
-          SERVICE_NAME=${{ inputs.env }}-${{ inputs.name }}
 
           gcloud secrets create $SERVICE_NAME --replication-policy="automatic" --data-file=<(echo -n "FirstStep=Initial") || true
 
