@@ -65,7 +65,7 @@ jobs:
       # - name: Defined Docker ARGS
       #   run: |
       #     DOCKER_BUILD_ARG_BUILD_TAG=$TAG
-      #     DOCKER_BUILD_ARGS="--build-arg BUILD_ID=$DOCKER_TAG"
+      #     DOCKER_BUILD_ARGS="--build-arg BUILD_ID=$TAG"
       #     DOCKER_ENVS=$(env | grep ^DOCKER_BUILD_ARG_*)
       #     for change in $DOCKER_ENVS; do
       #         set -- `echo $change | tr '=' ' '`
@@ -81,7 +81,6 @@ jobs:
             -t $IMAGE:$TAG \
             -t $IMAGE:latest \
             -f ${{ inputs.docker_file }} \
-            --cache-from $IMAGE \
             ${{ inputs.docker_context }}
 
           docker push --all-tags $IMAGE
