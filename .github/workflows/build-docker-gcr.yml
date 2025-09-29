@@ -44,7 +44,7 @@ jobs:
       - name: Configure Docker auth
         run: gcloud auth configure-docker -q
 
-      - name: Predefind
+      - name: Predefined
         run: |
           export APP_DIR=${APP_DIR:-.}
           export PACKAGE_DIR=${PACKAGE_DIR:-$APP_DIR}
@@ -54,14 +54,16 @@ jobs:
         run: cp ${PACKAGE_DIR}/envs/.env.${{ inputs.env }} ${PACKAGE_DIR}/.env || true
         continue-on-error: true
 
-      - name: Build and Push Docker image
+      - name: Defined Docker Tag
         run: |
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
-            TAG=${GITHUB_SHA::7}
+            export TAG=${GITHUB_SHA::7}
           else
-            TAG=${GITHUB_REF#refs/tags/}
+            export TAG=${GITHUB_REF#refs/tags/}
           fi
 
+      - name: Defined Docker ARGS
+        run: |
           DOCKER_BUILD_ARG_BUILD_TAG=$TAG
           DOCKER_BUILD_ARGS="--build-arg BUILD_ID=$DOCKER_TAG"
           DOCKER_ENVS=$(env | grep ^DOCKER_BUILD_ARG_*)
@@ -72,6 +74,8 @@ jobs:
               DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg $key=$value";
           done
 
+      - name: Build and Push Docker image
+        run: |
           docker pull $IMAGE || true
           docker build \
             -t $IMAGE:$TAG \
