@@ -47,6 +47,8 @@ jobs:
             export DOCKER_TAG=${GITHUB_REF#refs/tags/}
           fi
 
+          RESOURCE_TAG=$(echo "$DOCKER_TAG" | sed 's/\./-/g')
+
           gcloud secrets create $SERVICE_NAME --replication-policy="automatic" --data-file=<(echo -n "FirstStep=Initial") || true
 
           gcloud run deploy $SERVICE_NAME \
@@ -54,6 +56,6 @@ jobs:
             --region ${{ secrets.GCP_REGION }} \
             --set-env-vars DOTENV_PATH=/gsm/secret/dotenv \
             --set-secrets="/gsm/secret/dotenv=$SERVICE_NAME:latest" \
-            --tag $DOCKER_TAG \
+            --tag $RESOURCE_TAG \
             --platform managed \
             --quiet ${{ inputs.run_args }}
