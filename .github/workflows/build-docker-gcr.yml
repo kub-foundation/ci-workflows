@@ -44,13 +44,18 @@ jobs:
       - name: Configure Docker auth
         run: gcloud auth configure-docker -q
 
-      - name: Build and Push Docker image
+      - name: Predefind
         run: |
           export APP_DIR=${APP_DIR:-.}
           export PACKAGE_DIR=${PACKAGE_DIR:-$APP_DIR}
           export IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}"
-          cp ${PACKAGE_DIR}/envs/.env.${{ inputs.env }} ${PACKAGE_DIR}/.env || true
 
+      - name: Copy Env
+        run: cp ${PACKAGE_DIR}/envs/.env.${{ inputs.env }} ${PACKAGE_DIR}/.env || true
+        continue-on-error: true
+
+      - name: Build and Push Docker image
+        run: |
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
             TAG=${GITHUB_SHA::7}
           else
