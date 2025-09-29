@@ -60,15 +60,20 @@ jobs:
         run: |
           DOCKER_BUILD_ARGS=""
           set +e
-          DOCKER_ENVS=$(env | grep '^DOCKER_BUILD_ARG_')
+          DOCKER_ENVS=$(env | grep ^DOCKER_BUILD_ARG_*)
+          for change in $DOCKER_ENVS; do
+              set -- `echo $change | tr '=' ' '`
+              key=$(echo $1 | sed -e "s/^DOCKER_BUILD_ARG_//")
+              value=$2
+              DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg $key=$value";
+          done
+
           set -e
-    # for change in $DOCKER_ENVS; do
+
     #     set -- `echo $change | tr '=' ' '`
     #     key=$(echo $1 | sed -e "s/^DOCKER_BUILD_ARG_//")
     #     value=$2
     #     DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg $key=$value";
-    # done
-
       - name: Build and Push Docker image
         run: |
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
