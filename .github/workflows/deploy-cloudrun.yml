@@ -10,6 +10,9 @@ on:
       name:
         required: true
         type: string
+      run_args:
+        type: string
+        default: ""
       deploy_on:
         required: true
         type: string # main หรือ tag
@@ -44,12 +47,12 @@ jobs:
 
           SERVICE_NAME=${{ inputs.env }}-${{ inputs.name }}
 
-          gcloud secrets create $SERVICE_NAME --replication-policy="automatic" || true
-          
+          gcloud secrets create $SERVICE_NAME --replication-policy="automatic" --data-file=<(echo -n "FirstStep=Initial") || true
+
           gcloud run deploy $SERVICE_NAME \
             --image $IMAGE \
             --region ${{ secrets.GCP_REGION }} \
             --set-env-vars DOTENV_PATH=/gsm/secret/dotenv \
             --set-secrets="/gsm/secret/dotenv=$SERVICE_NAME:latest" \
             --platform managed \
-            --quiet
+            --quiet ${{ inputs.run_args }}
