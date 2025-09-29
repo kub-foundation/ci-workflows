@@ -59,7 +59,9 @@ jobs:
       - name: Defined Docker Build Args
         run: |
           DOCKER_BUILD_ARGS=""
+          set +e
           DOCKER_ENVS=$(env | grep '^DOCKER_BUILD_ARG_')
+          set -e
     # for change in $DOCKER_ENVS; do
     #     set -- `echo $change | tr '=' ' '`
     #     key=$(echo $1 | sed -e "s/^DOCKER_BUILD_ARG_//")
