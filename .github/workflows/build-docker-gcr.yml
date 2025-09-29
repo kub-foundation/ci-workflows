@@ -47,10 +47,17 @@ jobs:
       - name: Build and Push Docker image
         run: |
           if [ "${{ inputs.deploy_on }}" = "main" ]; then
-            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:main-${{ github.sha }}"
+            TAG=${GITHUB_SHA::7}
+            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$TAG"
           else
-            VERSION=${GITHUB_REF#refs/tags/}
-            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$VERSION"
+            TAG=${GITHUB_REF#refs/tags/}
+            IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$TAG"
           fi
-          docker build -t $IMAGE -f ${{ inputs.docker_file }} ${{ inputs.docker_context }}
+
+          echo env
+
+          docker build -t $IMAGE \
+            -f ${{ inputs.docker_file }} \
+            ${{ inputs.docker_context }}
+
           docker push $IMAGE
