@@ -68,7 +68,7 @@ jobs:
           done
 
           docker pull $IMAGE || true
-          docker build 
+          docker build \
             -t $IMAGE:$TAG \
             -t $IMAGE:latest \
             -f ${{ inputs.docker_file }} \
