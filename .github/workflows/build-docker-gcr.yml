@@ -54,7 +54,7 @@ jobs:
             IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.name }}:$TAG"
           fi
 
-          echo env
+          env
 
           docker build -t $IMAGE \
             -f ${{ inputs.docker_file }} \
